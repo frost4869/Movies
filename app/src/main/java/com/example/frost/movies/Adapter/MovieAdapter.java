@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,9 +24,10 @@ import java.util.List;
  * Created by Frost on 5/25/2017.
  */
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder>{
+public class MovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private OnLoadMoreListener onLoadMoreListener;
+    private View itemView;
     public List<Result> movieList;
     public Context context;
 
@@ -44,11 +46,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder>{
         return movieList.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }
 
+    public OnLoadMoreListener getOnLoadMoreListener() {
+        return onLoadMoreListener;
+    }
+
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
         this.onLoadMoreListener = onLoadMoreListener;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView movieTitle;
         public ImageView cover;
@@ -60,25 +66,49 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder>{
         }
     }
 
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.movie_card, parent, false);
+    public class LoadingViewHolder extends RecyclerView.ViewHolder {
+        public ProgressBar progressBar;
 
-        return new ViewHolder(itemView);
+        public LoadingViewHolder(View itemView) {
+            super(itemView);
+            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+        }
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        Result movie = movieList.get(position);
-        holder.movieTitle.setText(movie.original_title);
-        Glide.with(context)
-                .load(Constant.getImage_base_url() + "original/" + movie.poster_path)
-                .into(holder.cover);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_ITEM) {
+            itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.movie_card, parent, false);
+            return new ViewHolder(itemView);
+        } else if (viewType == VIEW_TYPE_LOADING) {
+            itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.loading_row, parent, false);
+            return new LoadingViewHolder(itemView);
+        }
+        return null;
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof ViewHolder) {
+            Result movie = movieList.get(position);
+            ViewHolder viewHolder = (ViewHolder) holder;
+            viewHolder.movieTitle.setText(movie.original_title);
+            Glide.with(context)
+                    .load(Constant.getImage_base_url() + "original/" + movie.poster_path)
+                    .into(viewHolder.cover);
+        } else if (holder instanceof LoadingViewHolder) {
+            LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
+            loadingViewHolder.progressBar.setIndeterminate(true);
+        }
+
     }
 
     @Override
     public int getItemCount() {
-        return movieList.size();
+        return movieList == null ? 0 : movieList.size();
     }
+
+
 }
