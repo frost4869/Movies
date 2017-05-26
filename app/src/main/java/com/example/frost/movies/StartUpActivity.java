@@ -9,7 +9,10 @@ import android.widget.TextView;
 
 import com.example.frost.movies.API.API.Config.Config;
 import com.example.frost.movies.API.API.Config.ConfigService;
-import com.example.frost.movies.Utils.SessionManager;
+import com.example.frost.movies.API.API.Genre.GenreService;
+import com.example.frost.movies.API.API.Genre.Genres;
+import com.example.frost.movies.Utils.ConfigSharePreference;
+import com.example.frost.movies.Utils.GenreSharePreference;
 import com.google.gson.Gson;
 
 import retrofit2.Call;
@@ -26,13 +29,15 @@ public class StartUpActivity extends AppCompatActivity {
         final TextView text = (TextView) findViewById(R.id.status);
         final ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
 
-        ConfigService service = new ConfigService();
-        service.GetConfig().enqueue(new Callback<Config>() {
+        ConfigService configService = new ConfigService();
+        final GenreService genreService = new GenreService();
+
+        configService.GetConfig().enqueue(new Callback<Config>() {
             @Override
             public void onResponse(Call<Config> call, Response<Config> response) {
                 if (response.isSuccessful()) {
                     Gson gson = new Gson();
-                    SessionManager manager = new SessionManager(getApplicationContext());
+                    ConfigSharePreference manager = new ConfigSharePreference(getApplicationContext());
 
                     String baseURL = response.body().getImages().getBase_url();
                     String secureBaseURL = response.body().getImages().getSecure_base_url();
@@ -45,8 +50,24 @@ public class StartUpActivity extends AppCompatActivity {
                     manager.createConfig(baseURL, secureBaseURL, jsonBackDropSize, jsonLogoSize, jsonPosterSize,
                             jsonProfileSize, jsonStillSize);
 
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(intent);
+                    genreService.GetAllGenres("en-EN").enqueue(new Callback<Genres>() {
+                        @Override
+                        public void onResponse(Call<Genres> call, Response<Genres> response) {
+                            if (response.isSuccessful()) {
+                                GenreSharePreference genreSharePreference = new GenreSharePreference(getApplicationContext());
+                                genreSharePreference.createGenre(response.body().genres);
+
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Genres> call, Throwable t) {
+                            text.setText("Error");
+                            pb.setVisibility(View.INVISIBLE);
+                        }
+                    });
                 }
             }
 
@@ -56,5 +77,6 @@ public class StartUpActivity extends AppCompatActivity {
                 pb.setVisibility(View.INVISIBLE);
             }
         });
+
     }
 }

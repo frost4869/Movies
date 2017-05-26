@@ -1,5 +1,7 @@
 package com.example.frost.movies.Utils;
 
+import com.example.frost.movies.API.API.Genre.Genres;
+
 import java.util.List;
 
 /**
@@ -20,6 +22,15 @@ public class Constant {
     private static List<String> profile_image_size;
     private static List<String> still_image_size;
 
+    private static Genres genres;
+
+    public static Genres getGenres() {
+        return genres;
+    }
+
+    public static void setGenres(Genres genres) {
+        Constant.genres = genres;
+    }
 
     public static String getBaseURL() {
         return BaseURL;

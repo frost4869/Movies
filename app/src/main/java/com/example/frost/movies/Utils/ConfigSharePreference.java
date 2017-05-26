@@ -13,7 +13,7 @@ import java.util.HashMap;
  * Created by Frost on 5/24/2017.
  */
 
-public class SessionManager {
+public class ConfigSharePreference {
 
     SharedPreferences sharedPreferences;
     Editor editor;
@@ -32,7 +32,9 @@ public class SessionManager {
 
     private static final String HAS_CONFIG = "HAS_CONFIG";
 
-    public SessionManager(Context context) {
+
+
+    public ConfigSharePreference(Context context) {
         this.context = context;
         sharedPreferences = context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
         editor = sharedPreferences.edit();

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,8 +38,6 @@ public class MovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public MovieAdapter(List<Result> movieList, Context context) {
         this.movieList = movieList;
         this.context = context;
-
-
     }
 
     @Override
@@ -56,13 +55,18 @@ public class MovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView movieTitle;
+        public TextView movieTitle, movieYear;
         public ImageView cover;
+        public RelativeLayout relativeLayout;
 
         public ViewHolder(View itemView) {
             super(itemView);
             movieTitle = (TextView) itemView.findViewById(R.id.title);
+            movieYear = (TextView) itemView.findViewById(R.id.year);
             cover = (ImageView) itemView.findViewById(R.id.cover);
+            relativeLayout = (RelativeLayout) itemView.findViewById(R.id.movie_info);
+
+            relativeLayout.bringToFront();
         }
     }
 
@@ -98,6 +102,7 @@ public class MovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             Glide.with(context)
                     .load(Constant.getImage_base_url() + "original/" + movie.poster_path)
                     .into(viewHolder.cover);
+            viewHolder.movieYear.setText(movie.release_date.substring(0, 4));
         } else if (holder instanceof LoadingViewHolder) {
             LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
             loadingViewHolder.progressBar.setIndeterminate(true);

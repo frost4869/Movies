@@ -9,13 +9,15 @@ import android.support.v7.widget.*
 import android.util.TypedValue
 import android.view.View
 import android.widget.Toast
+import com.example.frost.movies.API.API.Genre.Genres
 import com.example.frost.movies.API.API.Movies.Movie
 import com.example.frost.movies.API.API.Movies.MovieService
 import com.example.frost.movies.API.API.Movies.Result
 import com.example.frost.movies.Adapter.MovieAdapter
 import com.example.frost.movies.Utils.Constant
 import com.example.frost.movies.Utils.OnLoadMoreListener
-import com.example.frost.movies.Utils.SessionManager
+import com.example.frost.movies.Utils.ConfigSharePreference
+import com.example.frost.movies.Utils.GenreSharePreference
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
@@ -54,25 +56,24 @@ class MainActivity : AppCompatActivity() {
         movieAdapter!!.onLoadMoreListener = OnLoadMoreListener {
             movieList!!.add(null)
             movieAdapter!!.notifyItemInserted(movieList!!.size - 1)
-            Handler().postDelayed({
-                movieList!!.removeAt(movieList!!.size - 1)
-                movieAdapter!!.notifyItemRemoved(movieList!!.size)
 
-                //load more data
-                service.getAllMovies(++firstPage).enqueue(object : Callback<Movie> {
-                    override fun onFailure(call: Call<Movie>?, t: Throwable?) {
-                        Toast.makeText(applicationContext, "Load more failed", Toast.LENGTH_LONG).show()
-                    }
 
-                    override fun onResponse(call: Call<Movie>?, response: Response<Movie>?) {
-                        if (response!!.isSuccessful) {
-                            movieList!!.addAll(response.body()!!.results)
-                            movieAdapter!!.notifyDataSetChanged()
-                            isLoading = false
-                        }
+            //load more data
+            service.getAllMovies(++firstPage).enqueue(object : Callback<Movie> {
+                override fun onFailure(call: Call<Movie>?, t: Throwable?) {
+                    Toast.makeText(applicationContext, "Load more failed", Toast.LENGTH_LONG).show()
+                }
+
+                override fun onResponse(call: Call<Movie>?, response: Response<Movie>?) {
+                    if (response!!.isSuccessful) {
+                        movieList!!.removeAt(movieList!!.size - 1)
+                        movieAdapter!!.notifyItemRemoved(movieList!!.size)
+                        movieList!!.addAll(response.body()!!.results)
+                        movieAdapter!!.notifyDataSetChanged()
+                        isLoading = false
                     }
-                })
-            }, 5000)
+                }
+            })
         }
 
 
@@ -123,18 +124,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun GetConfigurations() {
-        val manager = SessionManager(applicationContext)
-        manager.checkConfig()
+        val configSharePref = ConfigSharePreference(applicationContext)
+        configSharePref.checkConfig()
 
-        val configs = manager.config
+        val configs = configSharePref.config
 
-        val base_url = configs[SessionManager.KEY_BASE_URL]
-        val secure_base_url = configs[SessionManager.KEY_SECURE_BASE_URL]
-        val backdrop_size = configs[SessionManager.KEY_BACKDROP_SIZE]
-        val logo_size = configs[SessionManager.KEY_LOGO_SIZE]
-        val poster_size = configs[SessionManager.KEY_POSTER_SIZE]
-        val profile_size = configs[SessionManager.KEY_PROFILE_SIZE]
-        val still_size = configs[SessionManager.KEY_STILL_SIZE]
+        val base_url = configs[ConfigSharePreference.KEY_BASE_URL]
+        val secure_base_url = configs[ConfigSharePreference.KEY_SECURE_BASE_URL]
+        val backdrop_size = configs[ConfigSharePreference.KEY_BACKDROP_SIZE]
+        val logo_size = configs[ConfigSharePreference.KEY_LOGO_SIZE]
+        val poster_size = configs[ConfigSharePreference.KEY_POSTER_SIZE]
+        val profile_size = configs[ConfigSharePreference.KEY_PROFILE_SIZE]
+        val still_size = configs[ConfigSharePreference.KEY_STILL_SIZE]
 
         val gson = Gson()
         val type = object : TypeToken<List<String>>() {
@@ -153,6 +154,19 @@ class MainActivity : AppCompatActivity() {
         Constant.setPoster_image_size(PosterSizes)
         Constant.setProfile_image_size(ProfileSizes)
         Constant.setStill_image_size(StillSizes)
+    }
+
+    fun GetGenres(){
+        val genreSharePref = GenreSharePreference(applicationContext)
+        genreSharePref.checkGenre()
+
+        val genresJsonString = genreSharePref.genreJsonString
+
+        val gson = Gson()
+        val type = object : TypeToken<List<Genres.Genre>>(){}.type
+        val genresList = gson.fromJson<List<Genres.Genre>>(genresJsonString[GenreSharePreference.KEY_GENRES], type)
+
+        Constant.getGenres().genres = genresList;
     }
 
     private fun initCollapsingToolbar() {
