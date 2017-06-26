@@ -9,15 +9,13 @@ import android.support.v7.widget.*
 import android.util.TypedValue
 import android.view.View
 import android.widget.Toast
+import com.bumptech.glide.Glide
 import com.example.frost.movies.API.API.Genre.Genres
 import com.example.frost.movies.API.API.Movies.Movie
 import com.example.frost.movies.API.API.Movies.MovieService
 import com.example.frost.movies.API.API.Movies.Result
 import com.example.frost.movies.Adapter.MovieAdapter
-import com.example.frost.movies.Utils.Constant
-import com.example.frost.movies.Utils.OnLoadMoreListener
-import com.example.frost.movies.Utils.ConfigSharePreference
-import com.example.frost.movies.Utils.GenreSharePreference
+import com.example.frost.movies.Utils.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
@@ -76,9 +74,14 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
+        fab.setOnClickListener {
+            recycler_view.smoothScrollToPosition(0)
+        }
+
 
         //val mLayoutManager = GridLayoutManager(this, 2)
-        val mLayoutManager = LinearLayoutManager(this);
+        //val mLayoutManager = LinearLayoutManager(this);
+        val mLayoutManager = SpeedyLayoutManager(this)
         recycler_view.layoutManager = mLayoutManager
         // recycler_view.addItemDecoration(GridSpacingItemDecoration(2, dpToPx(10), true))
         recycler_view.itemAnimator = DefaultItemAnimator()
@@ -170,7 +173,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initCollapsingToolbar() {
-        colapsing_bar.title = " "
+        colapsing_bar.title = getString(R.string.app_name)
+        Glide.with(this).load(R.drawable.backdrop)
+                .centerCrop()
+                .into(back_drop)
+
         //val appBarLayout = findViewById(R.id.app_bar) as AppBarLayout
         app_bar.setExpanded(true)
 
@@ -179,7 +186,10 @@ class MainActivity : AppCompatActivity() {
             internal var isShow = false
             internal var scrollRange = -1
 
+
             override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
+
+
                 if (scrollRange == -1) {
                     scrollRange = appBarLayout.totalScrollRange
                 }
@@ -187,7 +197,7 @@ class MainActivity : AppCompatActivity() {
                     colapsing_bar.title = getString(R.string.app_name)
                     isShow = true
                 } else if (isShow) {
-                    colapsing_bar.title = " "
+                    colapsing_bar.title = getString(R.string.app_name)
                     isShow = false
                 }
             }

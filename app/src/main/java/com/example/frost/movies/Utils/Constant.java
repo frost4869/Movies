@@ -11,7 +11,7 @@ import java.util.List;
 public class Constant {
 
     public static final String BaseURL = "https://api.themoviedb.org/3/";
-
+    public static final String imdbURL = "http://www.imdb.com/title/";
     private static final String API_KEY = "09e4cc13c99312bf18cad8339e83bc82";
 
     private static String image_base_url;
@@ -94,5 +94,9 @@ public class Constant {
 
     public static void setStill_image_size(List<String> still_image_size) {
         Constant.still_image_size = still_image_size;
+    }
+
+    public static String getImdbURL() {
+        return imdbURL;
     }
 }

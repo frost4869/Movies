@@ -2,6 +2,7 @@ package com.example.frost.movies.Adapter;
 
 import android.content.ContentProvider;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.frost.movies.API.API.Movies.Movie;
 import com.example.frost.movies.API.API.Movies.Result;
+import com.example.frost.movies.MovieDetailActivity;
 import com.example.frost.movies.R;
 import com.example.frost.movies.Utils.Constant;
 import com.example.frost.movies.Utils.OnLoadMoreListener;
@@ -96,12 +98,21 @@ public class MovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ViewHolder) {
-            Result movie = movieList.get(position);
+            final Result movie = movieList.get(position);
             ViewHolder viewHolder = (ViewHolder) holder;
             viewHolder.movieTitle.setText(movie.original_title);
             Glide.with(context)
                     .load(Constant.getImage_base_url() + "original/" + movie.poster_path)
                     .into(viewHolder.cover);
+            viewHolder.cover.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context, MovieDetailActivity.class);
+                    intent.putExtra("movie_id", movie.id);
+                    intent.putExtra("poster", movie.poster_path);
+                    context.startActivity(intent);
+                }
+            });
             viewHolder.movieYear.setText(movie.release_date.substring(0, 4));
         } else if (holder instanceof LoadingViewHolder) {
             LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
